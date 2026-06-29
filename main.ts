@@ -4,6 +4,7 @@ interface MediaConfig {
     appName: string;
     videoTypes: Record<string, string>;
     journalsPath: string;
+    dateFormat: string;
 }
 
 interface MediaRecord {
@@ -49,6 +50,154 @@ function formatLocalDate(date: Date): string {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+}
+
+/** 从 Daily Notes 核心插件获取配置，失败返回 null */
+function getDailyNoteConfig(app: App): { format: string; folder: string } | null {
+    try {
+        const internalPlugins = (app as unknown as {
+            internalPlugins: {
+                getPluginById(id: string): {
+                    enabled: boolean;
+                    instance: { options?: { format?: string; folder?: string } };
+                } | null;
+            };
+        }).internalPlugins;
+        const plugin = internalPlugins.getPluginById('daily-notes');
+        if (!plugin?.enabled) return null;
+        const options = plugin.instance.options;
+        if (!options) return null;
+        const format = typeof options.format === 'string'
+            ? options.format.replace(/YYYY/g, 'yyyy').replace(/DD/g, 'dd')
+            : null;
+        const folder = typeof options.folder === 'string' ? options.folder : null;
+        if (!format && !folder) return null;
+        return { format: format || 'yyyy-MM-dd', folder: folder || '' };
+    } catch {
+        return null;
+    }
+}
+
+function normalizeJournalsPath(path: string): string {
+    return (path || 'journals').trim().replace(/^\/+/, '').replace(/\/+$/, '') || 'journals';
+}
+
+interface DateFormatToken {
+    component: 'year' | 'year2' | 'month' | 'day';
+}
+
+const WEEKDAY_CHAR_REGEX = /[一二三四五六日天]/;
+const WEEKDAY_CHARS = ['日', '一', '二', '三', '四', '五', '六'];
+const formatTokenCache = new Map<string, { regex: RegExp; tokens: DateFormatToken[] }>();
+
+function escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function parseFormatTokens(format: string): { regex: RegExp; tokens: DateFormatToken[] } {
+    const cached = formatTokenCache.get(format);
+    if (cached) return cached;
+
+    const tokens: DateFormatToken[] = [];
+    let pattern = '';
+    let i = 0;
+    while (i < format.length) {
+        if ((format.startsWith('YYYY', i) || format.startsWith('yyyy', i)) && (i + 4 <= format.length)) {
+            pattern += '(\\d{4})';
+            tokens.push({ component: 'year' });
+            i += 4;
+        } else if ((format.startsWith('YY', i) || format.startsWith('yy', i)) && (i + 2 <= format.length)) {
+            pattern += '(\\d{2})';
+            tokens.push({ component: 'year2' });
+            i += 2;
+        } else if (format.startsWith('MM', i)) {
+            pattern += '(\\d{2})';
+            tokens.push({ component: 'month' });
+            i += 2;
+        } else if ((format.startsWith('DD', i) || format.startsWith('dd', i)) && (i + 2 <= format.length)) {
+            pattern += '(\\d{2})';
+            tokens.push({ component: 'day' });
+            i += 2;
+        } else if (format.startsWith('星期', i)) {
+            pattern += '星期[一二三四五六日天]';
+            i += 2;
+            if (i < format.length && WEEKDAY_CHAR_REGEX.test(format[i])) i += 1;
+        } else if (format[i] === '周') {
+            pattern += '周[一二三四五六日天]';
+            i += 1;
+            if (i < format.length && WEEKDAY_CHAR_REGEX.test(format[i])) i += 1;
+        } else {
+            pattern += escapeRegex(format[i]);
+            i += 1;
+        }
+    }
+    const result = { regex: new RegExp(pattern), tokens };
+    formatTokenCache.set(format, result);
+    return result;
+}
+
+function buildFilenameRegex(format: string): RegExp {
+    const { regex } = parseFormatTokens(format);
+    return new RegExp('^' + regex.source + '\\.md$');
+}
+
+function extractISOFromMatch(match: RegExpMatchArray, tokens: DateFormatToken[]): string | null {
+    let year = '';
+    let month = '';
+    let day = '';
+    for (let i = 0; i < tokens.length; i++) {
+        const val = match[i + 1];
+        if (tokens[i].component === 'year') year = val;
+        else if (tokens[i].component === 'year2') year = '20' + val;
+        else if (tokens[i].component === 'month') month = val;
+        else if (tokens[i].component === 'day') day = val;
+    }
+    const iso = `${year}-${month}-${day}`;
+    const parsed = new Date(iso);
+    if (isNaN(parsed.getTime())) return null;
+    return iso;
+}
+
+function parseDateFromPath(relativePath: string, format: string): string | null {
+    const { regex, tokens } = parseFormatTokens(format);
+    const fullRegex = new RegExp('^' + regex.source + '\\.md$');
+    const match = relativePath.match(fullRegex);
+    if (!match) return null;
+    return extractISOFromMatch(match, tokens);
+}
+
+function parseDateFromString(str: string, format: string): string | null {
+    const { regex, tokens } = parseFormatTokens(format);
+    const match = str.match(regex);
+    if (!match) return null;
+    return extractISOFromMatch(match, tokens);
+}
+
+function isoToFileDate(isoDate: string, format: string): string {
+    const parts = isoDate.split('-');
+    if (parts.length !== 3) return isoDate;
+    const year4 = parts[0];
+    const year2 = year4.slice(-2);
+    const month = parts[1];
+    const day = parts[2];
+    const weekdayChar = WEEKDAY_CHARS[new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getDay()];
+    return format
+        .replace(/yyyy|YYYY/g, year4)
+        .replace(/yy|YY/g, year2)
+        .replace(/MM/g, month)
+        .replace(/dd|DD/g, day)
+        .replace(/星期[一二三四五六日天]?/g, '星期' + weekdayChar)
+        .replace(/周[一二三四五六日天]?/g, '周' + weekdayChar);
+}
+
+function resolveFileDate(filePath: string, journalsPath: string, dateFormat: string): string {
+    const prefix = journalsPath + '/';
+    const relativePath = filePath.startsWith(prefix)
+        ? filePath.slice(prefix.length)
+        : filePath.split('/').pop() ?? filePath;
+    return parseDateFromPath(relativePath, dateFormat)
+        ?? parseDateFromString(filePath, dateFormat)
+        ?? formatLocalDate(new Date());
 }
 
 class VideoParser {
@@ -103,8 +252,7 @@ class VideoParser {
         const lines = content.split('\n');
         const records: MediaRecord[] = [];
 
-        const dateMatch = filePath.match(/(\d{4}-\d{2}-\d{2})/);
-        const fileDate = dateMatch ? dateMatch[1] : formatLocalDate(new Date());
+        const fileDate = resolveFileDate(filePath, this.config.journalsPath, this.config.dateFormat);
 
         lines.forEach(line => {
             const lineRecords = this.parseRecord(line, fileDate);
@@ -138,7 +286,7 @@ class VideoStorage {
     }
 
     onFileChange(file: TFile): boolean {
-        if (file.path.startsWith(this.config.journalsPath) && file.extension === 'md') {
+        if (file.path.startsWith(this.config.journalsPath + '/') && file.extension === 'md') {
             this.clearCache();
             return true;
         }
@@ -175,11 +323,12 @@ class VideoStorage {
         const { vault } = this.app;
         const records: MediaRecord[] = [];
 
+        const journalsPrefix = this.config.journalsPath + '/';
         const allFiles = vault.getMarkdownFiles().filter((file: TFile) =>
-            file.path.startsWith(this.config.journalsPath)
+            file.path.startsWith(journalsPrefix)
         );
 
-        const datePattern = /\d{4}-\d{2}-\d{2}\.md$/;
+        const datePattern = buildFilenameRegex(this.config.dateFormat);
         const dateFiles = allFiles.filter((file: TFile) => datePattern.test(file.name));
 
         const batchSize = 50;
@@ -287,6 +436,7 @@ class VideoStorage {
 class VideoConfigModal extends Modal {
     plugin: VideoTrackerPlugin;
     appName: string;
+    journalsPath: string;
     videoTypes: Record<string, string>;
     currentTab: string;
     contentArea!: HTMLElement;
@@ -296,6 +446,7 @@ class VideoConfigModal extends Modal {
         super(app);
         this.plugin = plugin;
         this.appName = plugin.config.appName || 'Media Journal';
+        this.journalsPath = plugin.config.journalsPath || 'journals';
         this.videoTypes = { ...plugin.config.videoTypes };
         this.currentTab = 'basic';
     }
@@ -347,11 +498,12 @@ class VideoConfigModal extends Modal {
     switchTab(tabKey: string): void {
         this.currentTab = tabKey;
 
-        document.querySelectorAll('.config-tab').forEach(btn => {
+        const { activeDocument } = window;
+        activeDocument.querySelectorAll('.config-tab').forEach(btn => {
             btn.classList.remove('active');
         });
         const tabIndex = tabKey === 'basic' ? 1 : 2;
-        const el = document.querySelector(`.config-tab:nth-child(${tabIndex})`);
+        const el = activeDocument.querySelector(`.config-tab:nth-child(${tabIndex})`);
         if (el) el.classList.add('active');
 
         this.renderCurrentTab();
@@ -384,6 +536,27 @@ class VideoConfigModal extends Modal {
         });
         nameInput.oninput = () => {
             this.appName = nameInput.value.trim() || 'Media Journal';
+        };
+
+        const dailyNoteConfig = getDailyNoteConfig(this.app);
+        const journalsHint = dailyNoteConfig?.folder
+            ? `检测到日记插件文件夹: ${dailyNoteConfig.folder}，已自动应用。可在此改为单独路径。`
+            : '日记文件存放的文件夹路径（相对 vault 根目录），默认为 journals';
+
+        const journalsSection = this.contentArea.createDiv('config-section');
+        journalsSection.createEl('h3', { text: '日记文件夹路径' });
+        journalsSection.createEl('p', { text: journalsHint, cls: 'config-description' });
+
+        const journalsGroup = journalsSection.createDiv('config-input-group');
+        journalsGroup.createEl('label', { text: '文件夹：' });
+        const journalsInput = journalsGroup.createEl('input', {
+            type: 'text',
+            cls: 'config-text-input',
+            value: this.journalsPath,
+            attr: { placeholder: 'journals' }
+        });
+        journalsInput.oninput = () => {
+            this.journalsPath = normalizeJournalsPath(journalsInput.value);
         };
 
         const previewSection = this.contentArea.createDiv('config-section');
@@ -500,6 +673,7 @@ class VideoConfigModal extends Modal {
 
             this.plugin.config.appName = cleanAppName;
             this.plugin.config.videoTypes = cleanTypes;
+            this.plugin.config.journalsPath = normalizeJournalsPath(this.journalsPath);
 
             const configPath = `${this.plugin.manifest.dir}/config.json`;
             const adapter = this.app.vault.adapter;
@@ -516,7 +690,7 @@ class VideoConfigModal extends Modal {
                 await leaf.setViewState({ type: 'empty' });
             }
 
-            setTimeout(() => {
+            window.setTimeout(() => {
                 void this.plugin.activateView();
                 new Notice('配置已保存并刷新');
             }, 100);
@@ -796,7 +970,8 @@ class VideoTrackerView extends ItemView {
 
     async openDailyNote(dateStr: string): Promise<void> {
         try {
-            const fileName = `${this.plugin.config.journalsPath}/${dateStr}.md`;
+            const fileDate = isoToFileDate(dateStr, this.plugin.config.dateFormat);
+            const fileName = `${this.plugin.config.journalsPath}/${fileDate}.md`;
             const file = this.app.vault.getAbstractFileByPath(fileName);
 
             if (!(file instanceof TFile)) {
@@ -870,6 +1045,18 @@ class VideoTrackerPlugin extends Plugin {
         } catch {
             this.config = this.getDefaultConfig();
         }
+        this.applyDailyNoteConfig();
+    }
+
+    applyDailyNoteConfig(): void {
+        const dailyNoteConfig = getDailyNoteConfig(this.app);
+        if (!this.config.journalsPath || typeof this.config.journalsPath !== 'string') {
+            this.config.journalsPath = dailyNoteConfig?.folder || 'journals';
+        }
+        if (!this.config.dateFormat || typeof this.config.dateFormat !== 'string') {
+            this.config.dateFormat = dailyNoteConfig?.format || 'yyyy-MM-dd';
+        }
+        this.config.journalsPath = normalizeJournalsPath(this.config.journalsPath);
     }
 
     getDefaultConfig(): MediaConfig {
@@ -881,7 +1068,8 @@ class VideoTrackerPlugin extends Plugin {
                 "variety": "综艺",
                 "book": "书籍"
             },
-            journalsPath: "journals"
+            journalsPath: "journals",
+            dateFormat: "yyyy-MM-dd"
         };
     }
 

@@ -42,11 +42,9 @@ try {
   }
   console.log(`📄 检测到 main.js: ${mainJsPath}\n`);
 
-  // 4. 检测其他文件
+  // 4. Release 资产：Obsidian 仅下载 main.js / manifest.json / styles.css
   const files = [mainJsPath, 'manifest.json'];
   if (existsSync('styles.css')) files.push('styles.css');
-  if (existsSync('config.json')) files.push('config.json');
-  if (existsSync('dist/assets/wechat-donate.jpg')) files.push('dist/assets/wechat-donate.jpg');
   
   console.log(`📦 将上传文件: ${files.join(', ')}\n`);
 

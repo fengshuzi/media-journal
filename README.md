@@ -9,6 +9,7 @@ Track books, movies, TV shows, and variety programs from daily notes with tags, 
 - **Comments included**: Store title and short review in one line.
 - **Monthly stats**: Filter by year and month with overview cards.
 - **Custom labels**: Rename the app title and media types in settings.
+- **Daily Notes sync**: Auto-detect journal folder and date format from the core Daily Notes plugin when available.
 
 ## Installation
 
@@ -22,10 +23,11 @@ Open Settings → Community plugins → Browse, then search for **Media Journal*
    - `main.js`
    - `manifest.json`
    - `styles.css`
-   - `config.json`
 2. Create `.obsidian/plugins/media-journal/` in your vault.
 3. Copy the files into that folder.
 4. Reload plugins and enable **Media Journal**.
+
+The plugin creates `config.json` on first save from the settings UI, or uses built-in defaults until then.
 
 ### Manual build
 
@@ -65,7 +67,8 @@ Open the sidebar ribbon icon or run **Open view** from the command palette to br
         "variety": "综艺",
         "book": "书籍"
     },
-    "journalsPath": "journals"
+    "journalsPath": "journals",
+    "dateFormat": "yyyy-MM-dd"
 }
 ```
 

@@ -6,5 +6,6 @@
         "variety": "综艺",
         "book": "书籍"
     },
-    "journalsPath": "journals"
+    "journalsPath": "journals",
+    "dateFormat": "yyyy-MM-dd"
 }

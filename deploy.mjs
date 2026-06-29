@@ -45,8 +45,7 @@ const vaults = [
 const files = [
   { source: 'dist/main.js', target: 'main.js' },
   { source: 'dist/manifest.json', target: 'manifest.json' },
-  { source: 'dist/styles.css', target: 'styles.css' },
-  { source: 'dist/config.json', target: 'config.json' }
+  { source: 'dist/styles.css', target: 'styles.css' }
 ];
 
 console.log('🚀 开始部署 Media Journal 插件...\n');
@@ -74,17 +73,11 @@ vaults.forEach((vault) => {
       }
     });
 
-    // 复制静态资源（如微信打赏二维码）
-    if (existsSync('dist/assets')) {
-      const assetsTarget = join(vault.path, 'assets');
-      if (!existsSync(assetsTarget)) mkdirSync(assetsTarget, { recursive: true });
-      ['wechat-donate.jpg'].forEach(f => {
-        const src = join('dist', 'assets', f);
-        if (existsSync(src)) {
-          copyFileSync(src, join(assetsTarget, f));
-          console.log(`  ✓ 已复制 assets/${f}`);
-        }
-      });
+    // 首次部署时写入默认 config.json；已有配置则不覆盖
+    const configTarget = join(vault.path, 'config.json');
+    if (!existsSync(configTarget) && existsSync('config.json')) {
+      copyFileSync('config.json', configTarget);
+      console.log('  ✓ 已复制 config.json → config.json（首次部署）');
     }
     
     console.log(`✅ ${vault.name} 部署成功\n`);

@@ -1,7 +1,6 @@
 import esbuild from "esbuild";
 import process from "process";
-import builtins from "builtin-modules";
-import { copyFileSync, existsSync, mkdirSync } from "fs";
+import { builtinModules } from "node:module";
 
 const banner =
 `/*
@@ -32,7 +31,7 @@ const context = await esbuild.context({
 		'@lezer/common',
 		'@lezer/highlight',
 		'@lezer/lr',
-		...builtins],
+		...builtinModules],
 	format: 'cjs',
 	target: 'es2018',
 	logLevel: "info",
@@ -43,15 +42,6 @@ const context = await esbuild.context({
 
 if (prod) {
 	await context.rebuild();
-	if (existsSync('assets')) {
-		if (!existsSync('dist/assets')) mkdirSync('dist/assets', { recursive: true });
-		['wechat-donate.jpg'].forEach(f => {
-			const src = `assets/${f}`;
-			if (existsSync(src)) {
-				copyFileSync(src, `dist/assets/${f}`);
-			}
-		});
-	}
 	process.exit(0);
 } else {
 	await context.watch();

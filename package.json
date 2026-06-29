@@ -1,11 +1,11 @@
 {
   "name": "media-journal",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Track books, movies, TV, and shows from daily notes with tags, comments, and monthly stats.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "npm run lint && node esbuild.config.mjs production && cp manifest.json styles.css config.json dist/",
+    "build": "npm run lint && rm -rf dist && node esbuild.config.mjs production && cp manifest.json styles.css dist/",
     "deploy": "npm run build && node deploy.mjs",
     "release": "node release.mjs",
     "lint": "eslint \"**/*.{ts,tsx}\""
@@ -21,7 +21,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^16.11.6",
-    "builtin-modules": "^5.0.0",
     "esbuild": "0.17.3",
     "obsidian": "latest",
     "typescript": "^5.9.3",
