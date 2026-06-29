@@ -1,130 +1,64 @@
-# 书影音 - Obsidian 插件
+# Media Journal
 
-基于日记文件的影视观看记录追踪插件，可以按年月查看观看历史和评论。
+Track books, movies, TV shows, and variety programs from daily notes with tags, comments, and monthly stats.
 
-## 功能特点
+## Features
 
-### 📺 影视记录
-- 支持电影、电视剧、综艺、书籍等多种类型
-- 自动从日记文件中提取观看记录
-- 记录标题和评论
+- **Journal-based logging**: Capture entries directly in daily notes.
+- **Flexible tags**: Support movies, TV, variety shows, and books.
+- **Comments included**: Store title and short review in one line.
+- **Monthly stats**: Filter by year and month with overview cards.
+- **Custom labels**: Rename the app title and media types in settings.
 
-### 📅 时间筛选
-- 按年份查看观看记录
-- 按月份查看观看记录
-- 支持查看全年数据
+## Installation
 
-### 📊 统计分析
-- 总观看数统计
-- 各类型观看数统计
-- 按日期分组展示
+### Community marketplace (recommended)
 
-### ⚙️ 灵活配置
-- 自定义应用名称
-- 自定义视频标签
-- 自定义影视类型
+Open Settings → Community plugins → Browse, then search for **Media Journal** or **fengshuzi**.
 
-## 安装方法
+### GitHub Release
 
-### 方式一：Obsidian 社区市场安装（推荐）
-
-打开 Obsidian 设置 → 第三方插件 → 浏览，搜索 **书影音** 或 **fengshuzi** 即可安装。
-
-
-### 方式一：从 GitHub Release 安装（推荐）
-
-1. 前往 [Releases](../../releases) 页面下载最新版本
-2. 下载以下文件：
+1. Download the latest release assets:
    - `main.js`
    - `manifest.json`
    - `styles.css`
    - `config.json`
-3. 在你的 Obsidian 库中创建插件目录：`.obsidian/plugins/obsidian-my-videos/`
-4. 将下载的文件复制到该目录
-5. 重启 Obsidian 或刷新插件列表
-6. 在设置中启用"书影音"插件
+2. Create `.obsidian/plugins/media-journal/` in your vault.
+3. Copy the files into that folder.
+4. Reload plugins and enable **Media Journal**.
 
-### 方式二：手动安装
+### Manual build
 
 ```bash
 cd /path/to/your/vault/.obsidian/plugins
-git clone https://github.com/你的用户名/obsidian-my-videos.git
-cd obsidian-my-videos
+git clone https://github.com/fengshuzi/media-journal.git
+cd media-journal
 npm install
 npm run build
 ```
 
-## 使用方法
+## Usage
 
-### 1. 在日记中记录观看
-
-在日记文件中使用以下格式记录观看：
+Add entries in daily notes under `journals/yyyy-mm-dd.md`:
 
 ```markdown
 # 2024-01-11
 
-- #video/movie 《肖申克的救赎》 经典之作，值得反复观看
-- #video/tv 《权力的游戏》 史诗级剧集，制作精良
-- #video/variety 《向往的生活》 轻松愉快的综艺节目
-- #video/book 《三体》 刘慈欣的科幻巨作
+- #movie 《Inception》 A mind-bending classic.
+- #tv 《Breaking Bad》 Tight pacing and great acting.
+- #variety 《Happy Camp》 Light and fun.
+- #book 《The Three-Body Problem》 A sci-fi landmark.
 ```
 
-### 2. 查看观看记录
+Open the sidebar ribbon icon or run **Open view** from the command palette to browse records and stats.
 
-1. 点击左侧边栏的 🎬 图标打开插件
-2. 选择年份和月份
-3. 查看该时间段的观看记录和统计
+## Configuration
 
-### 3. 配置插件
-
-点击"配置"按钮可以：
-- 修改应用名称
-- 修改视频标签（默认 `#video`）
-- 添加/删除/修改影视类型
-
-## 标签格式
-
-默认标签格式：`#video/类型`
-
-- `#video/movie` - 电影
-- `#video/tv` - 电视剧
-- `#video/variety` - 综艺
-- `#video/book` - 书籍
-
-可以在配置中自定义标签前缀和类型。
-
-## 记录格式
-
-推荐格式：
-```
-- #video/类型 《标题》 评论内容
-```
-
-示例：
-```
-- #video/movie 《盗梦空间》 诺兰的神作，烧脑但精彩
-- #video/tv 《绝命毒师》 剧情紧凑，演技炸裂
-- #video/book 《百年孤独》 魔幻现实主义经典
-```
-
-## 配置说明
-
-### 基础设置
-- **应用名称**：自定义插件显示名称（默认"书影音"）
-- **视频标签**：自定义标签前缀（如 `#video`、`#watch` 等）
-
-### 类型管理
-- 添加新的影视类型
-- 修改现有类型的关键词和名称
-- 删除不需要的类型
-
-### 配置文件
-
-插件使用 `config.json` 文件进行配置：
+`config.json` example:
 
 ```json
 {
-    "appName": "书影音",
+    "appName": "Media Journal",
     "videoTypes": {
         "movie": "电影",
         "tv": "电视剧",
@@ -135,24 +69,13 @@ npm run build
 }
 ```
 
-## 文件要求
-
-- 日记文件必须放在 `journals` 文件夹中
-- 日记文件名必须是 `yyyy-mm-dd.md` 格式（如 `2024-01-11.md`）
-
-## 开发
+## Development
 
 ```bash
-# 开发模式
 npm run dev
-
-# 构建
+npm run lint
 npm run build
-
-# 部署到本地vault
 npm run deploy
-
-# 发布到GitHub
 npm run release
 ```
 
@@ -162,16 +85,19 @@ MIT
 
 ---
 
-🎬 **开始记录你的观影历程吧！**
+## 中文说明
 
+Media Journal（书影音）是基于日记文件的书影记录插件，支持电影、电视剧、综艺、书籍的标签记录、评论和按月统计。
+
+在 Obsidian 社区插件中搜索 **Media Journal** 或 **fengshuzi** 安装。插件目录名为 `media-journal`。
 
 ---
 
-## ☕ 请作者喝杯咖啡
+## ☕ Support
 
-如果这个插件帮助了你，欢迎扫码打赏，感谢支持！
+If this plugin helps you, consider buying the author a coffee.
 
 <div align="center">
-  <img src="./assets/wechat-donate.jpg" alt="微信打赏" width="200" />
-  <p><sub>微信扫码打赏</sub></p>
+  <img src="https://raw.githubusercontent.com/fengshuzi/images/main/wechat-donate.jpg" alt="Donate" width="200" />
+  <p><sub>WeChat donate</sub></p>
 </div>

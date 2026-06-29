@@ -1,10 +1,10 @@
 {
-    "id": "obsidian-my-videos",
-    "name": "书影音",
-    "version": "1.0.1",
+    "id": "media-journal",
+    "name": "Media Journal",
+    "version": "1.1.0",
     "minAppVersion": "1.2.8",
-    "description": "基于日记文件的书影音记录追踪插件，记录电影、电视剧、综艺、书籍等观看/阅读历史。",
+    "description": "Track books, movies, TV, and shows from daily notes with tags, comments, and monthly stats.",
     "author": "lizhifeng",
-    "authorUrl": "https://github.com/yourusername",
+    "authorUrl": "https://github.com/fengshuzi",
     "isDesktopOnly": false
 }

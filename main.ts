@@ -149,11 +149,8 @@ class VideoStorage {
         }
         
         if (this.isCacheValid()) {
-            console.log('使用缓存的观看记录');
             return this.cache.records;
         }
-        
-        console.log('重新加载观看记录...');
         
         const { vault } = this.app;
         const records = [];
@@ -167,8 +164,6 @@ class VideoStorage {
         const datePattern = /\d{4}-\d{2}-\d{2}\.md$/;
         const dateFiles = allFiles.filter(file => datePattern.test(file.name));
         
-        console.log(`总文件数: ${allFiles.length}，日期格式文件: ${dateFiles.length}`);
-        
         // 批量处理
         const batchSize = 50;
         for (let i = 0; i < dateFiles.length; i += batchSize) {
@@ -178,8 +173,7 @@ class VideoStorage {
                 try {
                     const content = await vault.cachedRead(file);
                     return this.parser.parseFileContent(content, file.path);
-                } catch (error) {
-                    console.error(`读取文件 ${file.path} 失败:`, error);
+                } catch {
                     return [];
                 }
             });
@@ -189,8 +183,6 @@ class VideoStorage {
                 records.push(...fileRecords);
             });
         }
-        
-        console.log(`总共找到 ${records.length} 条观看记录`);
         
         // 更新缓存
         this.cache.records = records;
@@ -278,13 +270,13 @@ class VideoConfigModal extends Modal {
     constructor(app, plugin) {
         super(app);
         this.plugin = plugin;
-        this.appName = plugin.config.appName || '书影音';
+        this.appName = plugin.config.appName || 'Media Journal';
         this.videoTypes = { ...plugin.config.videoTypes };
         this.currentTab = 'basic';
     }
 
     onOpen() {
-        const appName = this.plugin.config.appName || '书影音';
+        const appName = this.plugin.config.appName || 'Media Journal';
         this.titleEl.setText(`${appName}配置`);
         
         const { contentEl } = this;
@@ -364,10 +356,10 @@ class VideoConfigModal extends Modal {
             type: 'text',
             cls: 'config-text-input',
             value: this.appName,
-            attr: { placeholder: '书影音', maxlength: '20' }
+            attr: { placeholder: 'Media Journal', maxlength: '20' }
         });
         nameInput.oninput = () => {
-            this.appName = nameInput.value.trim() || '书影音';
+            this.appName = nameInput.value.trim() || 'Media Journal';
         };
 
         const previewSection = this.contentArea.createDiv('config-section');
@@ -489,7 +481,7 @@ class VideoConfigModal extends Modal {
             new Notice('配置已保存，正在刷新...');
             this.close();
             
-            const leaves = this.app.workspace.getLeavesOfType(VIDEO_VIEW);
+            const leaves = this.app.workspace.getLeavesOfType(MEDIA_JOURNAL_VIEW);
             for (const leaf of leaves) {
                 await leaf.setViewState({ type: 'empty' });
             }
@@ -498,15 +490,14 @@ class VideoConfigModal extends Modal {
                 await this.plugin.activateView();
                 new Notice('配置已保存并刷新');
             }, 100);
-        } catch (error) {
-            console.error('保存配置失败:', error);
+        } catch {
             new Notice('保存配置失败');
         }
     }
 }
 
 // 影视追踪视图
-const VIDEO_VIEW = 'video-tracker-view';
+const MEDIA_JOURNAL_VIEW = 'media-journal-view';
 
 class VideoTrackerView extends ItemView {
     constructor(leaf, plugin) {
@@ -519,11 +510,11 @@ class VideoTrackerView extends ItemView {
     }
 
     getViewType() {
-        return VIDEO_VIEW;
+        return MEDIA_JOURNAL_VIEW;
     }
 
     getDisplayText() {
-        return this.plugin.config.appName || '书影音';
+        return this.plugin.config.appName || 'Media Journal';
     }
 
     getIcon() {
@@ -541,7 +532,7 @@ class VideoTrackerView extends ItemView {
     async render() {
         const container = this.containerEl.children[1];
         container.empty();
-        container.addClass('video-tracker-view');
+        container.addClass('media-journal-view');
 
         this.renderHeader(container);
         this.renderYearMonthSelector(container);
@@ -554,7 +545,7 @@ class VideoTrackerView extends ItemView {
     renderHeader(container) {
         const header = container.createDiv('video-header');
         
-        const appName = this.plugin.config.appName || '书影音';
+        const appName = this.plugin.config.appName || 'Media Journal';
         header.createEl('h2', { text: `🎬 ${appName}`, cls: 'video-title' });
         
         const actions = header.createDiv('video-actions');
@@ -673,8 +664,7 @@ class VideoTrackerView extends ItemView {
                 ? `已刷新并加载 ${this.currentRecords.length} 条观看记录`
                 : `已加载 ${this.currentRecords.length} 条观看记录`;
             new Notice(message);
-        } catch (error) {
-            console.error('加载观看记录失败:', error);
+        } catch {
             new Notice('加载观看记录失败');
         }
     }
@@ -792,8 +782,7 @@ class VideoTrackerView extends ItemView {
             const leaf = this.app.workspace.getLeaf(false);
             await leaf.openFile(file);
             
-        } catch (error) {
-            console.error('打开日记失败:', error);
+        } catch {
             new Notice('打开日记失败');
         }
     }
@@ -806,39 +795,35 @@ class VideoTrackerView extends ItemView {
 // 主插件类
 class VideoTrackerPlugin extends Plugin {
     async onload() {
-        console.log('加载书影音插件');
-
         await this.loadConfig();
         this.storage = new VideoStorage(this.app, this.config);
 
-        this.registerView(VIDEO_VIEW, (leaf) => new VideoTrackerView(leaf, this));
+        this.registerView(MEDIA_JOURNAL_VIEW, (leaf) => new VideoTrackerView(leaf, this));
 
-        const appName = this.config.appName || '书影音';
+        const appName = this.config.appName || 'Media Journal';
         this.addRibbonIcon('film', appName, () => {
             this.activateView();
         });
 
         this.addCommand({
-            id: 'open-video-tracker',
-            name: `打开${appName}`,
+            id: 'open-view',
+            name: 'Open view',
             callback: () => this.activateView()
         });
 
         this.addCommand({
-            id: 'refresh-video-tracker',
-            name: '刷新观看数据',
+            id: 'refresh-data',
+            name: 'Refresh data',
             callback: () => this.refreshData()
         });
     }
 
     async onunload() {
-        console.log('卸载书影音插件');
-        
         if (this.storage) {
             this.storage.destroy();
         }
         
-        this.app.workspace.detachLeavesOfType(VIDEO_VIEW);
+        this.app.workspace.detachLeavesOfType(MEDIA_JOURNAL_VIEW);
     }
 
     async loadConfig() {
@@ -849,24 +834,22 @@ class VideoTrackerPlugin extends Plugin {
             if (await adapter.exists(configPath)) {
                 const configContent = await adapter.read(configPath);
                 this.config = JSON.parse(configContent);
-                console.log('配置加载成功:', this.config);
             } else {
-                console.log('配置文件不存在，使用默认配置');
                 this.config = this.getDefaultConfig();
             }
-        } catch (error) {
-            console.error('加载配置失败:', error);
+        } catch {
             this.config = this.getDefaultConfig();
         }
     }
 
     getDefaultConfig() {
         return {
-            appName: "书影音",
+            appName: "Media Journal",
             videoTypes: {
                 "movie": "电影",
                 "tv": "电视剧",
-                "variety": "综艺"
+                "variety": "综艺",
+                "book": "书籍"
             },
             journalsPath: "journals"
         };
@@ -875,12 +858,12 @@ class VideoTrackerPlugin extends Plugin {
     async activateView() {
         const { workspace } = this.app;
         
-        let leaf = workspace.getLeavesOfType(VIDEO_VIEW)[0];
+        let leaf = workspace.getLeavesOfType(MEDIA_JOURNAL_VIEW)[0];
         
         if (!leaf) {
             leaf = workspace.getLeaf('tab');
             await leaf.setViewState({
-                type: VIDEO_VIEW,
+                type: MEDIA_JOURNAL_VIEW,
                 active: true
             });
         }
@@ -889,7 +872,7 @@ class VideoTrackerPlugin extends Plugin {
     }
 
     async refreshData() {
-        const leaves = this.app.workspace.getLeavesOfType(VIDEO_VIEW);
+        const leaves = this.app.workspace.getLeavesOfType(MEDIA_JOURNAL_VIEW);
         for (const leaf of leaves) {
             if (leaf.view instanceof VideoTrackerView) {
                 await leaf.view.loadAllRecords(true);

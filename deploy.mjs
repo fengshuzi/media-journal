@@ -17,27 +17,27 @@ const NOTE_DEMO_PATH = join(
 const vaults = [
   {
     name: 'Mobile',
-    path: join(BASE_PATH, '.obsidian-mobile/plugins/obsidian-my-videos')
+    path: join(BASE_PATH, '.obsidian-mobile/plugins/media-journal')
   },
   {
     name: 'Pro',
-    path: join(BASE_PATH, '.obsidian-pro/plugins/obsidian-my-videos')
+    path: join(BASE_PATH, '.obsidian-pro/plugins/media-journal')
   },
   {
     name: 'iPad',
-    path: join(BASE_PATH, '.obsidian-ipad/plugins/obsidian-my-videos')
+    path: join(BASE_PATH, '.obsidian-ipad/plugins/media-journal')
   },
   {
     name: '2017',
-    path: join(BASE_PATH, '.obsidian-2017/plugins/obsidian-my-videos')
+    path: join(BASE_PATH, '.obsidian-2017/plugins/media-journal')
   },
   {
     name: 'Zhang',
-    path: join(BASE_PATH, '.obsidian-zhang/plugins/obsidian-my-videos')
+    path: join(BASE_PATH, '.obsidian-zhang/plugins/media-journal')
   },
   {
     name: 'Note-Demo',
-    path: join(NOTE_DEMO_PATH, '.obsidian/plugins/obsidian-my-videos')
+    path: join(NOTE_DEMO_PATH, '.obsidian/plugins/media-journal')
   }
 ];
 
@@ -49,7 +49,7 @@ const files = [
   { source: 'dist/config.json', target: 'config.json' }
 ];
 
-console.log('🚀 开始部署 My Videos 插件...\n');
+console.log('🚀 开始部署 Media Journal 插件...\n');
 
 let successCount = 0;
 let failCount = 0;

@@ -49,7 +49,6 @@ if (prod) {
 			const src = `assets/${f}`;
 			if (existsSync(src)) {
 				copyFileSync(src, `dist/assets/${f}`);
-				console.log(`Copied ${src} -> dist/assets/${f}`);
 			}
 		});
 	}

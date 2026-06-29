@@ -1,6 +1,6 @@
-/* 我的影视 - 样式文件 */
+/* Media Journal - styles */
 
-.video-tracker-view {
+.media-journal-view {
     padding: 20px;
     height: 100%;
     overflow-y: auto;
@@ -449,7 +449,7 @@
 }
 
 /* 深色主题 iOS 玻璃风 */
-.theme-dark .video-tracker-view {
+.theme-dark .media-journal-view {
     --video-glass-bg: rgba(20, 26, 36, 0.56);
     --video-glass-elevated: rgba(28, 35, 48, 0.66);
     --video-glass-strong: rgba(36, 44, 60, 0.76);
@@ -459,10 +459,10 @@
     --video-glass-muted: #c5cede;
 }
 
-.theme-dark .video-tracker-view .year-month-selector,
-.theme-dark .video-tracker-view .video-date-group,
-.theme-dark .video-tracker-view .config-description,
-.theme-dark .video-tracker-view .config-preview-box {
+.theme-dark .media-journal-view .year-month-selector,
+.theme-dark .media-journal-view .video-date-group,
+.theme-dark .media-journal-view .config-description,
+.theme-dark .media-journal-view .config-preview-box {
     background: var(--video-glass-bg);
     border-color: var(--video-glass-border);
     box-shadow:
@@ -472,19 +472,19 @@
     -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 
-.theme-dark .video-tracker-view .video-record-item,
-.theme-dark .video-tracker-view .config-tab:hover {
+.theme-dark .media-journal-view .video-record-item,
+.theme-dark .media-journal-view .config-tab:hover {
     background: var(--video-glass-elevated);
     border-color: var(--video-glass-border);
 }
 
-.theme-dark .video-tracker-view .video-weekday,
-.theme-dark .video-tracker-view .video-comment,
-.theme-dark .video-tracker-view .config-tab {
+.theme-dark .media-journal-view .video-weekday,
+.theme-dark .media-journal-view .video-comment,
+.theme-dark .media-journal-view .config-tab {
     color: var(--video-glass-muted);
 }
 
-.theme-dark .video-tracker-view .stats-overview .stat-card {
+.theme-dark .media-journal-view .stats-overview .stat-card {
     background: var(--video-glass-strong);
     border: 1px solid var(--video-glass-border);
     box-shadow:
@@ -494,33 +494,33 @@
     -webkit-backdrop-filter: blur(20px) saturate(165%);
 }
 
-.theme-dark .video-tracker-view .stats-overview .stat-card.total {
+.theme-dark .media-journal-view .stats-overview .stat-card.total {
     background: linear-gradient(135deg, rgba(129, 140, 248, 0.34), rgba(91, 33, 182, 0.5));
     color: var(--video-glass-text);
 }
 
-.theme-dark .video-tracker-view .stats-overview .stat-card.type-movie {
+.theme-dark .media-journal-view .stats-overview .stat-card.type-movie {
     background: linear-gradient(135deg, rgba(244, 114, 182, 0.32), rgba(190, 24, 93, 0.5));
     color: #ffe8f3;
 }
 
-.theme-dark .video-tracker-view .stats-overview .stat-card.type-tv {
+.theme-dark .media-journal-view .stats-overview .stat-card.type-tv {
     background: linear-gradient(135deg, rgba(56, 189, 248, 0.32), rgba(14, 116, 144, 0.5));
     color: #e0f8ff;
 }
 
-.theme-dark .video-tracker-view .stats-overview .stat-card.type-variety {
+.theme-dark .media-journal-view .stats-overview .stat-card.type-variety {
     background: linear-gradient(135deg, rgba(52, 211, 153, 0.32), rgba(4, 120, 87, 0.5));
     color: #e3fff4;
 }
 
-.theme-dark .video-tracker-view .stats-overview .stat-card .stat-label,
-.theme-dark .video-tracker-view .stats-overview .stat-card .stat-value {
+.theme-dark .media-journal-view .stats-overview .stat-card .stat-label,
+.theme-dark .media-journal-view .stats-overview .stat-card .stat-value {
     opacity: 1;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.26);
 }
 
-.theme-dark .video-tracker-view .video-type-tag.type-tv,
-.theme-dark .video-tracker-view .video-type-tag.type-variety {
+.theme-dark .media-journal-view .video-type-tag.type-tv,
+.theme-dark .media-journal-view .video-type-tag.type-variety {
     color: #e6f9ff;
 }
