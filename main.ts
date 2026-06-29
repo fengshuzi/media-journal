@@ -853,7 +853,7 @@ class VideoTrackerPlugin extends Plugin {
     }
 
     onunload(): void {
-        this.app.workspace.detachLeavesOfType(MEDIA_JOURNAL_VIEW);
+        // Obsidian 会在卸载插件时自动清理 view，无需手动 detach leaves
     }
 
     async loadConfig(): Promise<void> {

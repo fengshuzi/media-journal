@@ -1,7 +1,7 @@
 {
     "id": "media-journal",
     "name": "Media Journal",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "minAppVersion": "1.2.8",
     "description": "Track books, movies, TV, and shows from daily notes with tags, comments, and monthly stats.",
     "author": "lizhifeng",
