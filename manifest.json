@@ -1,7 +1,7 @@
 {
     "id": "obsidian-my-videos",
     "name": "书影音",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "minAppVersion": "1.2.8",
     "description": "基于日记文件的书影音记录追踪插件，记录电影、电视剧、综艺、书籍等观看/阅读历史。",
     "author": "lizhifeng",

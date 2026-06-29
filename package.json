@@ -1,6 +1,6 @@
 {
   "name": "obsidian-my-videos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "影视观看记录追踪插件",
   "main": "main.js",
   "scripts": {
