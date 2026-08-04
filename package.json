@@ -1,6 +1,6 @@
 {
   "name": "media-journal",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Track books, movies, TV, and shows from daily notes with tags, comments, and monthly stats.",
   "main": "main.js",
   "scripts": {
